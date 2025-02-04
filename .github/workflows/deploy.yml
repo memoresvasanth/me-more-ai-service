@@ -38,11 +38,11 @@ jobs:
 
       - name: Force new deployment in ECS
         env:
-          CLUSTER_NAME: me-more-ai-service-cluster-1
-          SERVICE_NAME: me-more-ai-service
+          CLUSTER_NAME: me-more-ai-service-ecs-cluster-1
+          SERVICE_NAME: me-more-ai-service-service
           CONTAINER_NAME: me-more-ai-service-container
           ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-          ECR_REPOSITORY: me-more-ai-service
+          ECR_REPOSITORY: me-more-ai-service-ecr
           IMAGE_TAG: latest
         run: |
           aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment
