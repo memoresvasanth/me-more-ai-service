@@ -97,6 +97,30 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
+
+resource "aws_vpc_endpoint" "ecr_api" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.us-east-1.ecr.api"
+  vpc_endpoint_type = "Interface"
+  subnet_ids   = aws_subnet.public.*.id
+  security_group_ids = [aws_security_group.main.id]
+  tags = {
+    Name = "${var.app_name}-ecr-api-endpoint"
+  }
+}
+
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.us-east-1.ecr.dkr"
+  vpc_endpoint_type = "Interface"
+  subnet_ids   = aws_subnet.public.*.id
+  security_group_ids = [aws_security_group.main.id]
+  tags = {
+    Name = "${var.app_name}-ecr-dkr-endpoint"
+  }
+}
+
+
 # s3.tf
 resource "aws_s3_bucket" "codepipeline" {
   bucket = "${var.app_name}-codepipeline-${var.account_id}"
@@ -179,6 +203,14 @@ resource "aws_security_group" "main" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  egress {
+  from_port   = 443
+  to_port     = 443
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
   tags = {
     Name = "${var.app_name}-sg"
   }
@@ -252,6 +284,7 @@ resource "aws_iam_role_policy" "ecs_task_execution" {
           "ecr:GetDownloadUrlForLayer",
           "ecr:BatchGetImage",
           "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
